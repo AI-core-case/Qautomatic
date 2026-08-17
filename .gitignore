@@ -1,0 +1,21 @@
+# Temporary files the routines write before calling `gh`
+qa-body.tmp.md
+qa-comment.tmp.md
+
+# Real configuration (the .example files stay versioned)
+.env
+config.local.*
+
+# Credentials
+*.pem
+*.key
+
+# Local Claude Code permissions: they belong to the machine, not the repository.
+.claude/settings.local.json
+
+# Dependencies and build artifacts
+node_modules/
+.venv/
+__pycache__/
+test-results/
+playwright-report/
