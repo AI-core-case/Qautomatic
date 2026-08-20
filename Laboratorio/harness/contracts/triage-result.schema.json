@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://exemplo.invalid/harness/contracts/triage-result.schema.json",
+  "title": "triage-result",
+  "description": "Resultado da triagem de uma falha de pipeline. Produzido pelo agente ci-triage por meio da skill ci-failure-triage. Toda saida exige revisao humana.",
+  "type": "object",
+  "required": [
+    "id_triagem",
+    "sintoma",
+    "classificacao",
+    "confianca",
+    "causa_provavel",
+    "evidencias",
+    "proxima_acao",
+    "revisao_humana_obrigatoria",
+    "data_hora"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id_triagem": {
+      "type": "string",
+      "description": "Identificador generico da triagem.",
+      "minLength": 1,
+      "examples": ["triagem-0001"]
+    },
+    "id_execucao": {
+      "type": "string",
+      "description": "Execucao que originou a falha, quando aplicavel."
+    },
+    "sintoma": {
+      "type": "string",
+      "description": "O que falhou, em que ponto e em qual cenario. Uma frase.",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "classificacao": {
+      "type": "string",
+      "description": "Camada onde a falha esta. Sem evidencia suficiente para nenhuma das cinco, use inconclusivo.",
+      "enum": ["interface-e2e", "api", "automacao", "ambiente", "configuracao", "inconclusivo"]
+    },
+    "confianca": {
+      "type": "number",
+      "description": "Confianca na classificacao, baseada na evidencia e nao na plausibilidade. Abaixo de 0.6 a saida deve ser tratada como hipotese.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "causa_provavel": {
+      "type": "string",
+      "description": "Causa mais provavel, em uma frase.",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "hipoteses_concorrentes": {
+      "type": "array",
+      "description": "Hipoteses consideradas e o que confirmaria ou derrubaria cada uma. Obrigatorio quando a confianca e baixa.",
+      "items": {
+        "type": "object",
+        "required": ["hipotese"],
+        "additionalProperties": false,
+        "properties": {
+          "hipotese": { "type": "string" },
+          "confirmaria": { "type": "string" },
+          "derrubaria": { "type": "string" },
+          "descartada": { "type": "boolean" },
+          "motivo_do_descarte": { "type": "string" }
+        }
+      }
+    },
+    "evidencias": {
+      "type": "array",
+      "description": "Evidencias verificaveis que sustentam a classificacao. Sem evidencia, a classificacao deve ser inconclusivo.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["tipo", "referencia"],
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": ["captura-de-tela", "registro-de-execucao", "resultado-estruturado", "referencia-de-especificacao", "outro"]
+          },
+          "referencia": {
+            "type": "string",
+            "description": "Caminho relativo do artefato ou referencia que permite localizar o trecho citado.",
+            "examples": [".qa-runs/artifacts/execucao-0001/registro.txt"]
+          },
+          "descricao": { "type": "string" }
+        }
+      }
+    },
+    "reincidencia": {
+      "type": "object",
+      "description": "Indica se o sintoma ja consta em app-memory/known-issues/.",
+      "additionalProperties": false,
+      "properties": {
+        "reincidente": { "type": "boolean" },
+        "referencia": { "type": "string" }
+      }
+    },
+    "faltando_para_decidir": {
+      "type": "array",
+      "description": "O que seria necessario para concluir. Obrigatorio quando a classificacao e inconclusivo.",
+      "items": { "type": "string" }
+    },
+    "proxima_acao": {
+      "type": "string",
+      "description": "Uma acao concreta, para uma pessoa.",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "severidade_percebida": {
+      "type": "string",
+      "description": "Impressao de gravidade, sujeita a revisao humana.",
+      "enum": ["baixa", "media", "alta", "critica"]
+    },
+    "revisao_humana_obrigatoria": {
+      "type": "boolean",
+      "description": "Sempre verdadeiro. Nenhuma triagem do harness dispensa revisao humana.",
+      "const": true
+    },
+    "data_hora": {
+      "type": "string",
+      "description": "Data e hora da triagem, em formato ISO 8601.",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://exemplo.invalid/harness/contracts/test-result.schema.json",
+  "title": "test-result",
+  "description": "Resultado da execucao de um cenario de teste E2E/UI em ambiente autorizado. Produzido pelo agente e2e-executor por meio da skill execute-e2e.",
+  "type": "object",
+  "required": [
+    "id_execucao",
+    "cenario",
+    "ambiente",
+    "status",
+    "resumo",
+    "evidencias",
+    "data_hora"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id_execucao": {
+      "type": "string",
+      "description": "Identificador generico da execucao.",
+      "minLength": 1,
+      "examples": ["execucao-0001"]
+    },
+    "cenario": {
+      "type": "string",
+      "description": "Identificador ou titulo do cenario executado.",
+      "minLength": 1,
+      "examples": ["cenario-exemplo-01"]
+    },
+    "ambiente": {
+      "type": "string",
+      "description": "Ambiente onde o cenario foi executado. Producao exige aprovacao humana registrada.",
+      "enum": ["laboratorio", "homologacao-exemplo", "producao"]
+    },
+    "status": {
+      "type": "string",
+      "description": "Resultado observado. Sem observacao suficiente, use inconclusivo.",
+      "enum": ["passou", "falhou", "instavel", "bloqueado", "inconclusivo"]
+    },
+    "resumo": {
+      "type": "string",
+      "description": "O que foi observado, em uma ou duas frases. Sem diagnostico de causa.",
+      "minLength": 1,
+      "maxLength": 600
+    },
+    "resultado_esperado": {
+      "type": "string",
+      "description": "O que o cenario define como esperado."
+    },
+    "resultado_observado": {
+      "type": "string",
+      "description": "O que de fato aconteceu."
+    },
+    "evidencias": {
+      "type": "array",
+      "description": "Evidencias que sustentam o status. Obrigatoria pelo menos uma quando o status e falhou.",
+      "items": {
+        "type": "object",
+        "required": ["tipo", "caminho"],
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": ["captura-de-tela", "registro-de-execucao", "estado-observado", "outro"]
+          },
+          "caminho": {
+            "type": "string",
+            "description": "Caminho relativo do artefato dentro de .qa-runs/artifacts/.",
+            "examples": [".qa-runs/artifacts/execucao-0001/passo-03.png"]
+          },
+          "descricao": {
+            "type": "string",
+            "description": "O que a evidencia mostra."
+          }
+        }
+      }
+    },
+    "duracao_segundos": {
+      "type": "number",
+      "description": "Duracao da execucao do cenario.",
+      "minimum": 0
+    },
+    "reexecucoes": {
+      "type": "integer",
+      "description": "Quantidade de reexecucoes realizadas. Maximo permitido: 1.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "data_hora": {
+      "type": "string",
+      "description": "Data e hora do encerramento da execucao, em formato ISO 8601.",
+      "format": "date-time"
+    },
+    "encaminhado_para_triagem": {
+      "type": "boolean",
+      "description": "Indica se o resultado foi encaminhado ao fluxo triage-ci-failure.",
+      "default": false
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Notas adicionais, incluindo falha de captura de evidencia."
+    }
+  }
+}

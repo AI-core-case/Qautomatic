@@ -1,0 +1,125 @@
+# Workflow demonstrativo do laboratório de QA Agent Harness.
+#
+# Simula uma sessão de exploração de interface. NENHUM navegador é aberto,
+# NENHUMA URL é acessada e NENHUMA interação real acontece. Não usa segredo, não
+# chama serviço externo e não faz deploy.
+#
+# Observação: este arquivo vive em Laboratorio/.github/workflows/ e por isso não
+# é executado pelo GitHub — existe como demonstração de estrutura.
+
+name: Exploração de interface simulada (demonstrativo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      url_autorizada:
+        description: "URL fictícia autorizada (domínio não resolvível)"
+        required: true
+        default: "https://ambiente-laboratorio.exemplo.invalid/inicio"
+      ambiente:
+        description: "Ambiente fictício"
+        required: true
+        default: laboratorio
+        type: choice
+        options:
+          - laboratorio
+          - homologacao-exemplo
+      limite_de_passos:
+        description: "Limite de passos da sessão simulada"
+        required: true
+        default: "20"
+
+permissions:
+  contents: read
+
+jobs:
+  exploracao-simulada:
+    name: Sessão simulada de exploração
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Registrar parâmetros da sessão
+        run: |
+          echo "URL autorizada:    ${{ inputs.url_autorizada }}"
+          echo "Ambiente:          ${{ inputs.ambiente }}"
+          echo "Limite de passos:  ${{ inputs.limite_de_passos }}"
+          echo "Nenhum navegador é aberto. Nenhuma URL é acessada."
+
+      - name: Verificar autorização de ambiente
+        run: |
+          if [ "${{ inputs.ambiente }}" = "producao" ]; then
+            echo "Produção exige aprovação humana explícita, com escopo e janela. Interrompendo."
+            exit 1
+          fi
+          echo "Ambiente não produtivo. Sessão simulada autorizada."
+
+      - name: Verificar regras da skill agent-browser (simulado)
+        run: |
+          echo "Regras que a sessão real precisaria cumprir:"
+          echo " 1. navegar somente em URLs autorizadas"
+          echo " 2. capturar snapshot antes de cada interação"
+          echo " 3. registrar todos os passos executados"
+          echo " 4. capturar screenshot em qualquer falha"
+          echo " 5. nunca executar ação irreversível"
+          echo " 6. produção somente com aprovação humana explícita"
+          echo "Resultado simulado: todas consideradas atendidas."
+
+      - name: Gerar relatório fictício de sessão
+        run: |
+          mkdir -p relatorio
+          cat > relatorio/sessao-ficticia.md <<'REL'
+          # Relatório fictício de sessão de exploração
+
+          Documento gerado por workflow demonstrativo. Nenhuma navegação real
+          aconteceu; todos os dados abaixo são fictícios.
+
+          ## Identificação
+
+          | Campo | Valor fictício |
+          |---|---|
+          | Sessão | `sessao-navegacao-0001` |
+          | URL inicial | `https://ambiente-laboratorio.exemplo.invalid/inicio` |
+          | Ambiente | `laboratorio` |
+          | Resultado | `encerrada-por-limite` |
+
+          ## Passos simulados
+
+          1. abrir a tela inicial — snapshot inicial capturado
+          2. abrir a tela genérica de cadastro — sem divergência
+          3. preencher campo com `<texto-de-teste>` — sem divergência
+          4. observar rótulo do campo — **divergência**: rótulo aparece truncado
+
+          ## Observações fictícias
+
+          - **Achado:** rótulo truncado na tela de cadastro.
+            Evidência: `.qa-runs/artifacts/browser/sessao-navegacao-0001/observacao-01.png`
+            Candidata a cenário determinístico: sim.
+          - **Impressão:** transição entre telas pareceu lenta. Sem evidência
+            visual — registrado como impressão, não como achado.
+
+          ## Alertas de segurança fictícios
+
+          - `acao-irreversivel-encontrada`: botão de exclusão identificado na tela
+            de cadastro. Ação tomada: `passo-nao-executado`. Registrado, não
+            acionado.
+
+          ## Limites desta sessão
+
+          Exploração **complementa** a suíte E2E e não a substitui. Nenhum bug foi
+          aberto. Nenhuma ação irreversível foi executada. Nenhuma captura com
+          conteúdo sensível foi armazenada.
+          REL
+          echo "Relatório fictício gerado."
+
+      - name: Publicar relatório como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-exploracao-ficticio
+          path: relatorio/
+          retention-days: 7
+
+      - name: Encerrar sem ação externa
+        run: |
+          echo "Execução encerrada."
+          echo "Nenhuma URL acessada. Nenhum ticket criado. Nenhum dado alterado."

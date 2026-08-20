@@ -1,0 +1,117 @@
+# Workflow demonstrativo do laboratório de QA Agent Harness.
+#
+# Simula a geração e a revisão de cenários de teste. Não escreve na suíte
+# oficial, não usa segredo, não chama serviço externo e não faz deploy.
+#
+# Observação: este arquivo vive em Laboratorio/.github/workflows/ e por isso não
+# é executado pelo GitHub — existe como demonstração de estrutura.
+
+name: Cenários simulados (demonstrativo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "Modo de operação"
+        required: true
+        default: criacao
+        type: choice
+        options:
+          - criacao
+          - revisao
+      comportamento:
+        description: "Comportamento fictício a cobrir"
+        required: true
+        default: "fluxo-generico-de-cadastro"
+
+permissions:
+  contents: read
+
+jobs:
+  cenarios-simulados:
+    name: Geração e revisão simuladas de cenários
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Registrar parâmetros
+        run: |
+          echo "Modo:          ${{ inputs.modo }}"
+          echo "Comportamento: ${{ inputs.comportamento }}"
+          echo "Todo cenário produzido aqui é rascunho fictício."
+
+      - name: Validar ausência de dado real (simulado)
+        run: |
+          echo "Verificação simulada de dados de entrada."
+          echo "Apenas placeholders são aceitos: <usuario-exemplo>, <identificador-generico>."
+          echo "Nenhum dado pessoal, credencial ou valor contratual foi processado."
+
+      - name: Verificar determinismo dos rascunhos (simulado)
+        run: |
+          echo "Critérios verificados nesta etapa:"
+          echo " - resultado não depende de hora"
+          echo " - resultado não depende de ordem de execução"
+          echo " - resultado não depende de dado preexistente"
+          echo "Resultado simulado: rascunhos considerados determinísticos."
+
+      - name: Gerar relatório fictício de cenários
+        run: |
+          mkdir -p relatorio
+          cat > relatorio/cenarios-ficticios.md <<'REL'
+          # Relatório fictício de cenários
+
+          Documento gerado por workflow demonstrativo. Conteúdo integralmente
+          fictício.
+
+          ## Rascunhos produzidos (fictícios)
+
+          ### rascunho-cenario-0001
+
+          - **Título:** verificar mensagem de erro em campo obrigatório vazio
+          - **Pré-condições:** `<usuario-exemplo>` autenticado no ambiente de laboratório
+          - **Passos:**
+            1. abrir a tela genérica de cadastro
+            2. deixar o campo obrigatório vazio
+            3. acionar o envio
+          - **Resultado esperado:** mensagem de erro exibida junto ao campo vazio
+          - **Prioridade:** media
+          - **Riscos:** entrada inválida aceita silenciosamente (categoria: funcional)
+          - **Determinístico:** sim
+          - **Requer aprovação humana:** não
+
+          ### rascunho-cenario-0002
+
+          - **Título:** verificar limite superior de caracteres em campo de texto
+          - **Pré-condições:** `<usuario-exemplo>` autenticado no ambiente de laboratório
+          - **Passos:**
+            1. abrir a tela genérica de cadastro
+            2. preencher o campo com `<texto-de-teste>` no limite máximo
+            3. acionar o envio
+          - **Resultado esperado:** conteúdo aceito sem truncamento silencioso
+          - **Prioridade:** baixa
+          - **Riscos:** truncamento sem aviso ao usuário (categoria: usabilidade)
+          - **Determinístico:** sim
+          - **Requer aprovação humana:** não
+
+          ## Perguntas abertas (fictícias)
+
+          - O limite máximo de caracteres está definido em algum lugar? Sem
+            referência, o item é lacuna de especificação, não defeito.
+
+          ## Situação
+
+          Rascunhos **não aprovados**. Nenhum cenário entrou em suíte oficial.
+          REL
+          echo "Relatório fictício gerado."
+
+      - name: Publicar relatório como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-cenarios-ficticio
+          path: relatorio/
+          retention-days: 7
+
+      - name: Encerrar sem ação externa
+        run: |
+          echo "Execução encerrada."
+          echo "Nenhum cenário promovido. Nenhum ticket criado. Nenhum dado alterado."

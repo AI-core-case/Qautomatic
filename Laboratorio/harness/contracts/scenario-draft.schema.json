@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://exemplo.invalid/harness/contracts/scenario-draft.schema.json",
+  "title": "scenario-draft",
+  "description": "Rascunho de cenario de teste. Produzido pelo agente scenario-reviewer. Nenhum rascunho entra em suite oficial sem aprovacao humana.",
+  "type": "object",
+  "required": [
+    "titulo",
+    "pre_condicoes",
+    "passos",
+    "resultado_esperado",
+    "prioridade",
+    "riscos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id_rascunho": {
+      "type": "string",
+      "examples": ["rascunho-cenario-0001"]
+    },
+    "titulo": {
+      "type": "string",
+      "description": "O que o cenario verifica, em uma linha.",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "objetivo": {
+      "type": "string",
+      "description": "O comportamento verificavel que o cenario cobre, em uma frase."
+    },
+    "tipo": {
+      "type": "string",
+      "description": "Camada em que o cenario atua.",
+      "enum": ["interface-e2e", "api", "exploratorio"]
+    },
+    "pre_condicoes": {
+      "type": "array",
+      "description": "Estado necessario antes do primeiro passo. Somente dados ficticios e placeholders.",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "passos": {
+      "type": "array",
+      "description": "Passos numerados e deterministicos.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["ordem", "acao"],
+        "additionalProperties": false,
+        "properties": {
+          "ordem": { "type": "integer", "minimum": 1 },
+          "acao": { "type": "string", "minLength": 1 },
+          "verificacao": {
+            "type": "string",
+            "description": "O que se confere neste passo, quando aplicavel."
+          }
+        }
+      }
+    },
+    "resultado_esperado": {
+      "type": "string",
+      "description": "Resultado unico e verificavel ao fim dos passos.",
+      "minLength": 1
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": ["baixa", "media", "alta", "critica"]
+    },
+    "riscos": {
+      "type": "array",
+      "description": "O que aconteceria se este comportamento nao fosse coberto.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["descricao"],
+        "additionalProperties": false,
+        "properties": {
+          "descricao": { "type": "string", "minLength": 1 },
+          "categoria": {
+            "type": "string",
+            "enum": ["funcional", "usabilidade", "desempenho", "seguranca", "privacidade", "dado", "outro"]
+          }
+        }
+      }
+    },
+    "deterministico": {
+      "type": "boolean",
+      "description": "Falso quando o resultado depende de hora, ordem de execucao ou dado preexistente. Cenario nao deterministico deve ser rejeitado.",
+      "default": true
+    },
+    "requer_aprovacao_humana": {
+      "type": "boolean",
+      "description": "Verdadeiro quando algum passo envolve acao irreversivel ou ambiente de producao.",
+      "default": false
+    },
+    "cobre_comportamento": {
+      "type": "string",
+      "description": "Rastreabilidade: qual comportamento descrito este cenario cobre."
+    },
+    "veredito_revisao": {
+      "type": "string",
+      "description": "Preenchido no modo revisao.",
+      "enum": ["aprovar-com-ressalva", "ajustar", "descartar"]
+    },
+    "justificativa_revisao": {
+      "type": "string",
+      "description": "Motivo do veredito, com o trecho do cenario que o originou."
+    },
+    "perguntas_abertas": {
+      "type": "array",
+      "description": "Ambiguidades que impedem concluir o cenario sem resposta humana.",
+      "items": { "type": "string" }
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

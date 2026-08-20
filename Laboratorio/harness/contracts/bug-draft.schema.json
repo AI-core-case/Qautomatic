@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://exemplo.invalid/harness/contracts/bug-draft.schema.json",
+  "title": "bug-draft",
+  "description": "Rascunho de defeito. Nenhum agente do harness abre, edita ou fecha ticket externo: este documento existe para revisao e aprovacao humana.",
+  "type": "object",
+  "required": [
+    "titulo",
+    "descricao",
+    "passos",
+    "resultado_esperado",
+    "resultado_atual",
+    "severidade_sugerida",
+    "evidencias",
+    "revisao_humana_obrigatoria"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id_rascunho": {
+      "type": "string",
+      "description": "Identificador generico do rascunho.",
+      "examples": ["rascunho-bug-0001"]
+    },
+    "titulo": {
+      "type": "string",
+      "description": "O sintoma em uma linha, sem diagnostico embutido.",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "descricao": {
+      "type": "string",
+      "description": "O que acontece, em que contexto e com que frequencia. Sem dado pessoal e sem segredo.",
+      "minLength": 1
+    },
+    "ambiente": {
+      "type": "string",
+      "enum": ["laboratorio", "homologacao-exemplo", "producao"]
+    },
+    "pre_condicoes": {
+      "type": "array",
+      "description": "Estado necessario antes do primeiro passo.",
+      "items": { "type": "string" }
+    },
+    "passos": {
+      "type": "array",
+      "description": "Passos numerados, executaveis por outra pessoa, sem depender de estado nao declarado.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["ordem", "acao"],
+        "additionalProperties": false,
+        "properties": {
+          "ordem": { "type": "integer", "minimum": 1 },
+          "acao": { "type": "string", "minLength": 1 },
+          "observado": { "type": "string" }
+        }
+      }
+    },
+    "resultado_esperado": {
+      "type": "object",
+      "description": "O comportamento esperado e a referencia que o define. Sem referencia, o caso e lacuna de especificacao, nao defeito.",
+      "required": ["descricao"],
+      "additionalProperties": false,
+      "properties": {
+        "descricao": { "type": "string", "minLength": 1 },
+        "referencia": {
+          "type": "string",
+          "description": "Onde o comportamento esperado esta definido."
+        }
+      }
+    },
+    "resultado_atual": {
+      "type": "string",
+      "description": "O que se observou, nao o que se concluiu.",
+      "minLength": 1
+    },
+    "severidade_sugerida": {
+      "type": "string",
+      "description": "Sugestao do agente. A decisao e humana. Em duvida entre dois niveis, sugira o menor.",
+      "enum": ["baixa", "media", "alta", "critica"]
+    },
+    "justificativa_severidade": {
+      "type": "string",
+      "description": "Criterio objetivo que sustenta a severidade sugerida."
+    },
+    "evidencias": {
+      "type": "array",
+      "description": "No minimo duas evidencias independentes do sintoma, conforme evidence-policy.",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["tipo", "caminho"],
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": ["captura-de-tela", "registro-de-execucao", "resultado-estruturado", "amostra-sintetica", "outro"]
+          },
+          "caminho": { "type": "string", "minLength": 1 },
+          "descricao": { "type": "string" }
+        }
+      }
+    },
+    "hipotese_de_erro_na_automacao": {
+      "type": "object",
+      "description": "Registro de que a hipotese de erro no proprio teste foi considerada.",
+      "additionalProperties": false,
+      "properties": {
+        "considerada": { "type": "boolean" },
+        "afastada": { "type": "boolean" },
+        "motivo": { "type": "string" }
+      }
+    },
+    "reincidencia": {
+      "type": "string",
+      "description": "Referencia em app-memory/known-issues/, quando o sintoma ja e conhecido."
+    },
+    "confianca": {
+      "type": "number",
+      "description": "Confianca de que se trata de defeito de produto.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "revisao_humana_obrigatoria": {
+      "type": "boolean",
+      "description": "Sempre verdadeiro. O rascunho nao se torna ticket sem aprovacao humana explicita.",
+      "const": true
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

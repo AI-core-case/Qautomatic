@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://exemplo.invalid/harness/contracts/browser-session.schema.json",
+  "title": "browser-session",
+  "description": "Registro de uma sessao de exploracao de interface. Produzido pelo agente browser-explorer por meio da skill agent-browser. Complementa a suite E2E e nao a substitui.",
+  "type": "object",
+  "required": [
+    "id_sessao",
+    "url",
+    "ambiente",
+    "objetivo",
+    "passos_executados",
+    "resultado",
+    "screenshots",
+    "data_hora",
+    "alertas_de_seguranca"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id_sessao": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["sessao-navegacao-0001"]
+    },
+    "url": {
+      "type": "string",
+      "description": "URL inicial autorizada da sessao.",
+      "minLength": 1,
+      "examples": ["https://ambiente-laboratorio.exemplo.invalid/inicio"]
+    },
+    "urls_autorizadas": {
+      "type": "array",
+      "description": "Lista de URLs autorizadas no pedido. Nada fora dela e navegado.",
+      "items": { "type": "string" }
+    },
+    "ambiente": {
+      "type": "string",
+      "description": "Producao exige aprovacao humana explicita registrada, com escopo e janela.",
+      "enum": ["laboratorio", "homologacao-exemplo", "producao"]
+    },
+    "aprovacao_humana": {
+      "type": "object",
+      "description": "Obrigatoria quando o ambiente e producao.",
+      "additionalProperties": false,
+      "properties": {
+        "referencia": { "type": "string" },
+        "escopo": { "type": "string" },
+        "janela": { "type": "string" }
+      }
+    },
+    "objetivo": {
+      "type": "string",
+      "description": "O que a sessao pretende observar, em uma frase.",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "limite_de_passos": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "passos_executados": {
+      "type": "array",
+      "description": "Passos na ordem em que aconteceram. Passo nao registrado nao aconteceu.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["ordem", "acao", "observado"],
+        "additionalProperties": false,
+        "properties": {
+          "ordem": { "type": "integer", "minimum": 1 },
+          "acao": { "type": "string", "minLength": 1 },
+          "observado": { "type": "string", "minLength": 1 },
+          "snapshot_anterior": {
+            "type": "string",
+            "description": "Caminho do snapshot capturado antes da interacao."
+          },
+          "divergencia": {
+            "type": "boolean",
+            "description": "Verdadeiro quando o observado difere da expectativa razoavel.",
+            "default": false
+          }
+        }
+      }
+    },
+    "links_nao_seguidos": {
+      "type": "array",
+      "description": "Destinos fora da lista de URLs autorizadas, registrados e nao abertos.",
+      "items": { "type": "string" }
+    },
+    "observacoes": {
+      "type": "array",
+      "description": "Achados da exploracao. Observacao sem screenshot e impressao, nao achado.",
+      "items": {
+        "type": "object",
+        "required": ["descricao"],
+        "additionalProperties": false,
+        "properties": {
+          "descricao": { "type": "string", "minLength": 1 },
+          "esperado": { "type": "string" },
+          "screenshot": { "type": "string" },
+          "classificacao": {
+            "type": "string",
+            "enum": ["achado", "impressao"]
+          },
+          "candidata_a_cenario": {
+            "type": "boolean",
+            "description": "Verdadeiro quando a observacao vale virar cenario deterministico.",
+            "default": false
+          }
+        }
+      }
+    },
+    "resultado": {
+      "type": "string",
+      "description": "Como a sessao terminou.",
+      "enum": [
+        "concluida",
+        "encerrada-por-limite",
+        "abortada-por-seguranca",
+        "abortada-por-ambiente-nao-autorizado",
+        "abortada-por-acao-irreversivel",
+        "inconclusiva"
+      ]
+    },
+    "resumo": {
+      "type": "string",
+      "description": "O que a sessao observou, em ate cinco linhas.",
+      "maxLength": 1200
+    },
+    "screenshots": {
+      "type": "array",
+      "description": "Capturas gravadas em .qa-runs/artifacts/browser/. Tela com segredo visivel nao e capturada.",
+      "items": {
+        "type": "object",
+        "required": ["caminho"],
+        "additionalProperties": false,
+        "properties": {
+          "caminho": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [".qa-runs/artifacts/browser/sessao-navegacao-0001/passo-02.png"]
+          },
+          "momento": {
+            "type": "string",
+            "enum": ["antes-da-interacao", "apos-a-interacao", "falha"]
+          },
+          "descricao": { "type": "string" }
+        }
+      }
+    },
+    "data_hora": {
+      "type": "string",
+      "description": "Data e hora do encerramento da sessao, em formato ISO 8601.",
+      "format": "date-time"
+    },
+    "alertas_de_seguranca": {
+      "type": "array",
+      "description": "Alertas registrados sem reproduzir o conteudo sensivel. Lista vazia quando nao houve alerta.",
+      "items": {
+        "type": "object",
+        "required": ["tipo", "descricao"],
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "possivel-segredo-em-tela",
+              "possivel-dado-pessoal-em-tela",
+              "acao-irreversivel-encontrada",
+              "redirecionamento-nao-autorizado",
+              "indicio-de-falha-de-seguranca",
+              "outro"
+            ]
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Onde esta o problema, sem reproduzir o conteudo.",
+            "minLength": 1
+          },
+          "acao_tomada": {
+            "type": "string",
+            "enum": ["sessao-abortada", "captura-descartada", "registrado-e-escalado", "passo-nao-executado"]
+          }
+        }
+      }
+    }
+  }
+}

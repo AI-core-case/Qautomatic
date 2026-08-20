@@ -1,0 +1,118 @@
+# Workflow demonstrativo do laboratório de QA Agent Harness.
+#
+# Não executa teste real, não chama serviço externo, não faz deploy e não usa
+# segredo. Todas as etapas são simuladas e o relatório gerado é fictício.
+#
+# Observação: este arquivo vive em Laboratorio/.github/workflows/ e por isso não
+# é executado pelo GitHub — só workflows na raiz do repositório são acionados.
+# Ele existe como demonstração de estrutura.
+
+name: Análise simulada (demonstrativo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      escopo:
+        description: "Escopo fictício da análise"
+        required: true
+        default: "suite-exemplo-01"
+      ambiente:
+        description: "Ambiente fictício de laboratório"
+        required: true
+        default: "ambiente-laboratorio"
+        type: choice
+        options:
+          - ambiente-laboratorio
+          - ambiente-homolog-exemplo
+
+permissions:
+  contents: read
+
+jobs:
+  analise-simulada:
+    name: Análise simulada de resultados
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Registrar parâmetros da execução
+        run: |
+          echo "Escopo:   ${{ inputs.escopo }}"
+          echo "Ambiente: ${{ inputs.ambiente }}"
+          echo "Nenhuma execução real de teste acontece neste workflow."
+
+      - name: Bloquear ambiente de produção
+        run: |
+          if [ "${{ inputs.ambiente }}" = "producao" ]; then
+            echo "Ambiente de produção exige aprovação humana explícita. Interrompendo."
+            exit 1
+          fi
+          echo "Ambiente autorizado para laboratório."
+
+      - name: Validar estrutura do harness (simulado)
+        run: |
+          echo "Verificando presença dos diretórios esperados..."
+          for caminho in harness/workflows harness/policies harness/contracts harness/prompts; do
+            echo " - esperado: Laboratorio/$caminho"
+          done
+          echo "Validação simulada concluída. Nenhum arquivo foi alterado."
+
+      - name: Validar contratos JSON (simulado)
+        run: |
+          echo "Contratos que seriam validados nesta etapa:"
+          echo " - test-result.schema.json"
+          echo " - triage-result.schema.json"
+          echo " - bug-draft.schema.json"
+          echo " - scenario-draft.schema.json"
+          echo " - browser-session.schema.json"
+          echo "Resultado simulado: todos considerados válidos."
+
+      - name: Gerar relatório fictício
+        run: |
+          mkdir -p relatorio
+          cat > relatorio/analise-ficticia.md <<'REL'
+          # Relatório fictício de análise
+
+          Documento gerado por workflow demonstrativo. Todos os valores são
+          fictícios e não correspondem a nenhuma execução real.
+
+          ## Resumo
+
+          | Métrica | Valor fictício |
+          |---|---|
+          | Cenários considerados | 12 |
+          | Passaram | 10 |
+          | Falharam | 1 |
+          | Inconclusivos | 1 |
+
+          ## Achados fictícios
+
+          1. `cenario-exemplo-04` — divergência simulada entre resultado esperado
+             e observado. Classificação sugerida: `interface-e2e`.
+             Confiança: 0.55 — abaixo do limite, exige revisão humana.
+          2. `cenario-exemplo-09` — resultado inconclusivo simulado por ausência
+             de evidência. Nenhuma classificação atribuída.
+
+          ## Pendências de revisão humana
+
+          - Confirmar a classificação do achado 1.
+          - Definir a evidência mínima faltante do achado 2.
+
+          ## Limites deste relatório
+
+          Nenhum teste foi executado. Nenhum serviço externo foi chamado. Nenhum
+          ticket foi criado, editado ou fechado.
+          REL
+          echo "Relatório fictício gerado em relatorio/analise-ficticia.md"
+
+      - name: Publicar relatório como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-analise-ficticio
+          path: relatorio/
+          retention-days: 7
+
+      - name: Encerrar sem ação externa
+        run: |
+          echo "Execução encerrada."
+          echo "Nenhum ticket criado. Nenhuma mensagem enviada. Nenhum dado alterado."
